@@ -5,22 +5,23 @@
 			width:100%;
 			pointer-events:none;
 			transition:opacity 2s, -webkit-transform 1s;
-			-webkit-transform-style:preserve-3d;	
+			-webkit-transform-style:preserve-3d;
+			-webkit-backface-visibility:hidden;				
 
 		}
 
 		.elevation path,
 		.elevation polygon {
-			fill:white;
-			fill-opacity:0.03;
+			fill:#9B7F6A;
+			fill-opacity:0.05;
 			stroke:white;
 			stroke-width:0px;
-			-webkit-transition:all 0s;
+			-webkit-transition:fill-opacity 0.5s;
 
 		}
 
 		body {
-			background:#61788C;
+			background:#9BB2C4;
 			overflow:hidden;
 			font-family:Verdana, sans-serif;
 			-webkit-touch-callout: none;
@@ -53,7 +54,7 @@
 			-webkit-transform-style: preserve-3d;
 			-webkit-perspective:2000px;
 			margin-left:-10%;
-			margin-top:-10%;
+			margin-top:-5%;
 			overflow:hidde;
 		}
 
@@ -83,10 +84,16 @@
 			fil:#ddd;
 		}
 
+		.underwater path,
+		.underwater polygon {
+			fill:#FDFBED;
+			fill-opacity:0.06;
+		}
+
 		.wateredge path,
 		.wateredge polygon {
-			fill-opacity:0.2;
-			stroke-width:0.25px;
+			fill-opacity:1;
+			fill:#FDFBED;
 		}
 
 		#compass {
@@ -184,8 +191,8 @@
 			-webkit-transition:padding-top 0.1s ease-out, opacity 0.5s ease-out;
 		}
 		.labeltext {
-			color:white; 
-			background:#333; 
+			color:#333; 
+			background:white; 
 			padding:5px 8px;
 			border-radius:2px;
 			font-size:0.6em;
@@ -193,8 +200,8 @@
 
 		.labelline {
 			width:0px;
-			height:160px; 
-			border-left:1.5px solid #333; 
+			height:130px; 
+			border-left:1.5px solid white; 
 			margin:0 auto;
 			-webkit-transform-origin:50% 0%;
 		}
@@ -228,14 +235,14 @@
 
 		#spinner:not(.topo) .wateredge path,
 		#spinner:not(.topo) .wateredge polygon{
-			fill-opacity:0.3;
+			fill-opacity:1;
 			-webkit-transition:fill-opacity 0s;
 		}	
 
 
 		#streets path {
 			fill:none;
-			stroke:white;
+			stroke:#31485C;
 			stroke-width:0.25px;
 		}
 
@@ -312,7 +319,7 @@
 			c-0.19-2.66,12.415-9.374,9.976-15.772C85.735,210.601,90.295,210.539,90.295,210.539"/>
 	</svg>
 			<button onclick="$('#spinner').attr('style','');$('#threedee').attr('id','twodee')">2D</button>
-			<button onclick='$("#labels").toggle()'>Toggle annotations</button>
+			<button onclick='$("#labels text").toggle()'>Toggle annotations</button>
 			<button onclick='$(".placelabel").toggleClass("visible")'>Toggle landmarks</button>
 			<button onclick='gps()'>find your location</button>
 			<button onclick='mapmode()'>streets/topo</button>
@@ -334,8 +341,9 @@
 	<script>
 		var currentx=0;
 		var currenty=0;
-		var xrotate=55;
-		$('#scene').load('layer_v2.html');
+		var xrotate=50;
+		var stackcoefficient=3;
+		$('#scene').load('layers_0-1000_chunked.html');
 	
 		
 		//slider change
@@ -347,9 +355,15 @@
 			$('#ice').attr('stroke-width',(sliderval^1.8)*15-15);
 
 		    //$('#water').css('-webkit-transform','rotateX('+xrotate+'deg) translateZ('+(sliderval*0.5+214)+'px)');
-		    $('.wateredge').attr('class','elevation terrain');
-		    $('#group'+targetgroup).attr('class','elevation terrain wateredge');
 
+		    $('g').each(function(index){
+		    	if (index>sliderval)
+		    		{$(this).attr('class','')}
+		    	if (index<sliderval)
+		    		{$(this).attr('class','underwater')}
+		    	if (index==sliderval)		    	
+		    		{$(this).attr('class','wateredge')}
+		    })
 			
 	
 		});
@@ -394,7 +408,7 @@
 		function mapmode(){
 
 			if ($('.topo').length==0)
-				{$('.terrain').each(function(index){$(this).css('-webkit-transform','translateZ('+index*2+'px)');});
+				{$('.terrain').each(function(index){$(this).css('-webkit-transform','translateZ('+index*stackcoefficient+'px)');});
 				$('#spinner').toggleClass('topo');}
 
 			else {$('#spinner').toggleClass('topo');$('.elevation').attr('style','');	}
@@ -437,10 +451,11 @@
 	function laty(lat){return -1006.012632*lat+38049.89746};
 
 	function current_location(lat,lon){
+		console.log(lat+', '+lon);
 		var x=lonx(lon)+'%';
 		var y=laty(lat)+'%';
 
-		$('#vertrotator').append('<div class="placelabel" id="iamhere" style="-webkit-transform:rotateX(-90deg) rotateY('+currentx+'deg); top:'+x+';left:'+y+'"><div class="labeltext" style="background:purple;border-radius:10px"> You are here</div><div class="labelline" style="border:2px solid purple"></div></div>');
+		$('#vertrotator').append('<div class="placelabel" id="iamhere" style="-webkit-transform:rotateX(-90deg) rotateY('+currentx+'deg); top:'+x+';left:'+y+'"><div class="labeltext" style="background:purple;color:white"> You are here</div><div class="labelline" style="border:1px solid purple;height:150px;"></div></div>');
 		}		
 		</script>	
 	</body>
