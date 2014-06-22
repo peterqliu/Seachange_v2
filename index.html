@@ -4,25 +4,26 @@
 			position:absolute;
 			width:100%;
 			pointer-events:none;
-			transition:opacity 2s, -webkit-transform 1s;
+			transition:opacity 2s, -webkit-transform 0.5s;
 			-webkit-transform-style:preserve-3d;
 			-webkit-backface-visibility:hidden;				
-
 		}
-
+		.underwater#group-10 path{
+			stroke:#FDFBED;
+			stroke-width:0.25;
+		}
 		.elevation path,
 		.elevation polygon {
 			fill:#9B7F6A;
 			fill-opacity:0.05;
 			stroke:white;
 			stroke-width:0px;
-			-webkit-transition:fill-opacity 0.5s;
+			-webkit-transition:fill-opacity 0s;
 
 		}
 
 		body {
 			background:#9BB2C4;
-			overflow:hidden;
 			font-family:Verdana, sans-serif;
 			-webkit-touch-callout: none;
 			-webkit-user-select: none;
@@ -31,6 +32,7 @@
 			-ms-user-select: none;
 			user-select: none;
 			margin:0;
+			overflow:hidden;
 		}
 		
 		#water {
@@ -52,10 +54,10 @@
 			height:100%;
 			float:left;
 			-webkit-transform-style: preserve-3d;
-			-webkit-perspective:2000px;
+			-webkit-perspective:1500px;
 			margin-left:-10%;
-			margin-top:-5%;
-			overflow:hidde;
+			margin-top:-10%;
+			z-index:-1;
 		}
 
 		.threedee {
@@ -69,11 +71,12 @@
 
 		#spinner {
 			-webkit-transform-style:preserve-3d;	
-			-webkit-transform:rotateX(35deg) rotateZ(0deg);	
+			-webkit-transform:rotateX(50deg) rotateZ(20deg);	
 			margin:0 auto; 
 			width:100%; 
 			-webkit-transform-origin:60% 60%;
-			pointer-events:none;		
+			pointer-events:none;
+			background:#9BB2C4;		
 		}
 
 		#coast path {
@@ -88,20 +91,24 @@
 		.underwater polygon {
 			fill:#FDFBED;
 			fill-opacity:0.06;
+			-webkit-transition:fill-opacity 1s;			
 		}
 
 		.wateredge path,
 		.wateredge polygon {
 			fill-opacity:1;
 			fill:#FDFBED;
+			transition:none;
 		}
 
 		#compass {
 			position:fixed; 
-			bottom:0px; 
+			top:0px; 
 			left:0px; 
-			opacity:0.5;
+			opacity:0.8;
 			padding:20px;
+			-webkit-transform:translateZ(100000px);
+			z-index:2;
 		}
 
 		#sidebar {
@@ -112,7 +119,9 @@
 			position:absolute;
 			width:15%;
 			z-index:1;
+			width:15%;
 			max-width:250px;
+			-webkit-transform:translateZ(10000px);
 		}
 
 		.range {
@@ -178,16 +187,16 @@
 			-webkit-backface-visibility: hidden;
 			opacity:0.7;
 			-webkit-transform:translateZ(200px);
+			z-index:-2;
 		}
 		.placelabel{
 			-webkit-transform:rotateX(-90deg);
-			-webkit-filter:blur(0px);
 			position:absolute;
 			text-align:center;
 			z-index:1;
 			-webkit-transform-origin:50% 0%;
-			padding-top:120px;
-			opacity:0;
+			padding-top:80px;
+			opacity:1;
 			-webkit-transition:padding-top 0.1s ease-out, opacity 0.5s ease-out;
 		}
 		.labeltext {
@@ -206,9 +215,9 @@
 			-webkit-transform-origin:50% 0%;
 		}
 
-		.visible {
-			padding-top:60px;
-			opacity:1;
+		.hidden {
+			padding-top:160px;
+			opacity:0;
 		}
 
 		#iamhere {
@@ -219,24 +228,27 @@
 
 		/* Streets layer */
 		#streets {
-			opacity:0;
+			opacity:0.6;
+			-webkit-transition:opacity 0.4s ease-out, -webkit-transform 0.4s ease-out;
+			-webkit-transform:translateZ(-2000px) scale(0);
+			transition-timing-function: cubic-bezier(0, 0, 0.3, 1);
+
 		}
+
 		#spinner:not(.topo) #streets {
 			opacity:1;
-			-webkit-transition:none;
+			-webkit-transform:none;
 		}		
 
 		#spinner:not(.topo) .elevation path,
 		#spinner:not(.topo) .elevation polygon{
 			fill-opacity:0;
-			-webkit-transition:fill-opacity 1s;
-
+			fill:#FDFBED;			
 		}
 
 		#spinner:not(.topo) .wateredge path,
 		#spinner:not(.topo) .wateredge polygon{
 			fill-opacity:1;
-			-webkit-transition:fill-opacity 0s;
 		}	
 
 
@@ -251,7 +263,15 @@
 			.labeltext{
 				font-size:1em;
 			}
-		}		
+		}	
+
+		@media only (-webkit-min-device-pixel-ratio: 2), 
+		(min-resolution: 192dpi) { 
+
+				#scene {
+					max-width:1250px;
+				}
+		}			
 	</style>
 	<body>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
@@ -320,7 +340,7 @@
 	</svg>
 			<button onclick="$('#spinner').attr('style','');$('#threedee').attr('id','twodee')">2D</button>
 			<button onclick='$("#labels text").toggle()'>Toggle annotations</button>
-			<button onclick='$(".placelabel").toggleClass("visible")'>Toggle landmarks</button>
+			<button onclick='$(".placelabel").toggleClass("hidden")'>Toggle landmarks</button>
 			<button onclick='gps()'>find your location</button>
 			<button onclick='mapmode()'>streets/topo</button>
 
@@ -339,7 +359,7 @@
 
 
 	<script>
-		var currentx=0;
+		var currentz=0;
 		var currenty=0;
 		var xrotate=50;
 		var stackcoefficient=3;
@@ -376,31 +396,43 @@
 		    $('#scene').on('mousemove',function(e){
 		    	if(isDown){
 					window.xdrag=x-e.pageX;
-					$('#spinner').css('-webkit-transform','rotateX('+xrotate+'deg) rotateZ('+(currentx+xdrag/2)+'deg)')
+					window.ydrag=y-e.pageY;
+
+					window.currentpivot=xrotate+ydrag/4;
+
+					//constrict xrotate to 30-90 degrees
+					if (currentpivot>=70){
+						currentpivot=70
+					}
+					if (currentpivot<=0){
+						currentpivot=0
+					}		
+
+					$('#spinner').css('-webkit-transform','rotateX('+currentpivot+'deg) rotateZ('+(currentz+xdrag/2)+'deg)')
 										
 					//vertical labels
-					$('.placelabel').css('-webkit-transform','rotateX(-90deg) rotateY('+(currentx+xdrag/2)+'deg)'
+					$('.placelabel').css('-webkit-transform','rotateX(-90deg) rotateY('+(currentz+xdrag/2)+'deg)'
 					)	
 
 					//rotate each horizontal label around its centroid
 					$('.threedee .horizlabel').each(function()
 						{var xpos=$(this).attr('x'); var ypos=$(this).attr('y');
-						$(this).attr('transform','rotate('+(currentx+xdrag/2)*-1+','+xpos+','+ypos+')')
+						$(this).attr('transform','rotate('+(currentz+xdrag/2)*-1+','+xpos+','+ypos+')')
 						}
 					)
 
 					//rotate compass
-					$('#compass').css('-webkit-transform','rotateX('+(xrotate-10)+'deg) rotateZ('+(currentx+xdrag/2-45)+'deg)')
+					$('#compass').css('-webkit-transform','rotateX('+(xrotate-10)+'deg) rotateZ('+(currentz+xdrag/2-45)+'deg)')
 
 					//automatically stop rotation when drag goes out of the area (i.e. into sidebar)
 					.mouseout(function() 
-						{isDown = false; currentx=currentx+xdrag/2; console.log(currentx)}) 		
+						{isDown = false; currentz=currentz+xdrag/2}) 		
 				}
 			
 			}) 
 		})	
 		.mouseup(function() 
-			{isDown = false; currentx=currentx+xdrag/2; console.log(currentx)})  
+			{isDown = false; currentz=currentz+xdrag/2; xrotate=currentpivot; console.log('Current Z rotation '+currentz+', X rotation '+xrotate);console.log('ydrag was '+ydrag);})  
 
 
 		//Toggle between street and topology modes
@@ -455,7 +487,7 @@
 		var x=lonx(lon)+'%';
 		var y=laty(lat)+'%';
 
-		$('#vertrotator').append('<div class="placelabel" id="iamhere" style="-webkit-transform:rotateX(-90deg) rotateY('+currentx+'deg); top:'+x+';left:'+y+'"><div class="labeltext" style="background:purple;color:white"> You are here</div><div class="labelline" style="border:1px solid purple;height:150px;"></div></div>');
+		$('#vertrotator').append('<div class="placelabel" id="iamhere" style="-webkit-transform:rotateX(-90deg) rotateY('+currentz+'deg); top:'+x+';left:'+y+'"><div class="labeltext" style="background:purple;color:white"> You are here</div><div class="labelline" style="border:1px solid purple;height:180px;"></div></div>');
 		}		
 		</script>	
 	</body>
