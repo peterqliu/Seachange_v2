@@ -4,15 +4,25 @@
 			pointer-events:none;
 			transition:opacity 2s, -webkit-transform 0.5s;
 		}
+		#layer1 {
+			background-image:url('grid.png');
+			overflow:hidden;
 
+		}
+
+		.grid {
+			display:none;
+			stroke:white;
+			stroke-width:0.5
+		}
 		.underwater#group-10 path{
 			stroke:#FDFBED;
-			stroke-width:0.25;
+			stroke-width:0.5;
 			stroke-opacity:1;
 		}
 
 		.terrain {
-			transition-timing-function: cubic-bezier(0,2.8,.54,1);
+			transition-timing-function: cubic-bezier(0,2.8,.7,1);
 		}
 		.terrain path,
 		.terrain polygon {
@@ -33,7 +43,7 @@
 			-ms-user-select: none;
 			user-select: none;
 			margin:0;
-			overflow:hidden;
+			overflow:visible;
 		}
 		
 		#water {
@@ -70,7 +80,8 @@
 			width:100%; 
 			-webkit-transform-origin:60% 60%;
 			pointer-events:none;
-			background-image:url('grid.png');
+			will-change:-webkit-transform;
+			overflow:visible;
 		}
 
 		#coast path {
@@ -84,10 +95,13 @@
 		.underwater path,
 		.underwater polygon {
 			fill:#FDFBED;
-			fill-opacity:0.06;
+			fill-opacity:0.04;
 			-webkit-transition:fill-opacity 1s;         
 		}
 
+		.wateredge {
+			background-image:url('grid.png');
+		}
 		.wateredge path,
 		.wateredge polygon {
 			fill-opacity:1;
@@ -178,35 +192,37 @@
 			margin:0 auto;
 			padding-bottom:50%;
 			-webkit-transform-style:preserve-3d;
-			opacity:0.7;
-			-webkit-transform:translateZ(150px);
+			-webkit-transform:translateZ(190px);
 		}
 
 		.placelabel{
 			-webkit-transform:rotateX(-90deg);
+			font-size:1.2em;
 			position:absolute;
 			text-align:center;
 			z-index:1;
 			-webkit-transform-origin:50% 0%;
-			opacity:1;
+			opacity:0.5;
 			-webkit-transition: padding-top 0.5s ease-out, opacity 0.5s ease-out;
-			transition-timing-function: cubic-bezier(0,2.8,.54,1);
-
+			transition-timing-function: cubic-bezier(0,1.8,.7,1);
+			will-change:padding-top;
 		}
 		.labeltext {
-			color:white; 
-			background:#333; 
+			color:black; 
+			background:white; 
 			padding:3px 6px;
 			border-radius:2px;
 			font-size:0.5em;
 		}
 
 		.labelline {
-			width:10px;
-			height:80px; 
+			width: 0; 
 			margin:0 auto;
-			-webkit-transform-origin:50% 0%;
-			fill:#333;
+			height: 0; 
+			border-left: 5px solid transparent;
+			border-right: 5px solid transparent;
+			border-top: 5px solid white;
+			display:block;
 		}
 
 		.hidden {
@@ -266,24 +282,23 @@
 		}   
 		/* 2D labels */
 		.twodee #vertrotator {
-			-webkit-transform:translateZ(60px);
+			-webkit-transform:translateZ(50px);
 		}
 		.twodee .placelabel {
 			-webkit-transform:none;
 			padding-top:0px;
 			text-align:left;
 		}
-		.twodee .labelline {
-			text-align:left;
-		}
+
 		.twodee .labelline {
 			display:none;
 		}
 
-		@media only screen and (min-width:1800px) {
 
-			.labeltext{
-				font-size:1em;
+		@media only screen and (min-width:1600px) {
+
+			.placelabel{
+				font-size:1.8em;
 			}
 
 			#vertrotator {
